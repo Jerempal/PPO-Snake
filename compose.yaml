@@ -1,0 +1,21 @@
+services:
+  snake-gpu:
+    build:
+      context: .
+      args:
+        TORCH_BACKEND: gpu
+    image: snake-rl:gpu
+    gpus: all
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./runs:/app/runs
+      - ./src:/app/src:ro
+      - ./configs:/app/configs:ro
+    command:
+      - --config
+      - configs/ppo.toml
+      - --device
+      - cuda
+      - --run-name
+      - ppo-gpu-seed42

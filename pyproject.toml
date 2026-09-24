@@ -1,0 +1,119 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "snake-rl"
+version = "0.2.0"
+description = "PPO pour Snake, comparé à des solveurs déterministes."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Jerempal" }]
+keywords = ["reinforcement-learning", "gymnasium", "ppo", "snake"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "gymnasium>=1.1,<2",
+  "numpy>=1.26,<3",
+]
+
+[project.urls]
+Repository = "https://github.com/Jerempal/snake-rl-benchmark"
+Issues = "https://github.com/Jerempal/snake-rl-benchmark/issues"
+
+[project.optional-dependencies]
+train = [
+  "stable-baselines3>=2.7,<3",
+  "tensorboard>=2.18,<3",
+  "tqdm>=4.67,<5",
+]
+cpu = ["torch>=2.7,<3"]
+gpu = ["torch>=2.7,<3"]
+play = [
+  "pillow>=11,<13",
+  "pygame>=2.6,<3",
+]
+dev = [
+  "build>=1.2,<2",
+  "pre-commit>=4,<5",
+  "pytest>=8.3,<10",
+  "pytest-cov>=6,<8",
+  "ruff>=0.11,<1",
+  "tqdm>=4.67,<5",
+]
+all = [
+  "build>=1.2,<2",
+  "pillow>=11,<13",
+  "pre-commit>=4,<5",
+  "pygame>=2.6,<3",
+  "pytest>=8.3,<10",
+  "pytest-cov>=6,<8",
+  "ruff>=0.11,<1",
+  "stable-baselines3>=2.7,<3",
+  "tensorboard>=2.18,<3",
+  "torch>=2.7,<3",
+  "tqdm>=4.67,<5",
+]
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu", extra = "cpu" },
+  { index = "pytorch-cu128", extra = "gpu" },
+]
+
+[tool.uv]
+conflicts = [
+  [
+    { extra = "cpu" },
+    { extra = "gpu" },
+  ]
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[project.scripts]
+snake-train = "snake_rl.train:main"
+snake-evaluate = "snake_rl.evaluate:main"
+snake-baseline-evaluate = "snake_rl.baselines:main"
+snake-benchmark = "snake_rl.benchmark:main"
+snake-record-demo = "snake_rl.record_demo:main"
+snake-report = "snake_rl.report:main"
+snake-play = "snake_rl.play:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/snake_rl"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers --cov=snake_rl --cov-report=term-missing --cov-fail-under=85"
+testpaths = ["tests"]
+
+[tool.ruff]
+extend-exclude = ["_archive"]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.coverage.run]
+# Seuls la lecture et l'enregistrement graphiques sont exclus de la couverture.
+omit = [
+  "src/snake_rl/play.py",
+  "src/snake_rl/record_demo.py",
+]

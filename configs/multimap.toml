@@ -1,0 +1,72 @@
+map_sizes = [8, 10, 12]
+
+[architecture]
+cnn_channels = [24, 32, 48]
+strides = [1, 1, 1]
+pool_size = 9
+residual_blocks = true
+normalization = "group"
+groups = 4
+
+[environment]
+width = 12
+height = 12
+loop_max_state_visits = 3
+grid_size = 12
+
+[start_states]
+enabled = false
+standard_probability = 0.25
+min_length_fraction = 0.25
+max_length_fraction = 0.80
+length_distribution = "normal"
+mean_length_fraction = 0.45
+std_length_fraction = 0.08
+
+[rewards]
+step = -0.001
+food = 0.5
+death = -2.0
+win = 5.0
+distance_beta = 0.3
+loop = -0.25
+
+[training]
+seed = 42
+total_timesteps = 9_000_000
+n_envs = 63
+env_backend = "subprocess"
+learning_rate = 1e-3
+learning_rate_schedule = "linear"
+final_learning_rate = 5e-4
+n_steps = 512
+batch_size = 2016
+n_epochs = 5
+gamma = 0.995
+gae_lambda = 0.95
+clip_range = 0.15
+target_kl = 0.02
+ent_coef = 0.01
+hidden_size = 128
+hidden_layers = 2
+vf_coef = 0.5
+device = "auto"
+
+[evaluation]
+frequency = 483_840
+episodes = 15
+n_envs = 32
+deterministic = true
+patience = 1000
+min_score_improvement = 0.0
+
+[checkpoint]
+frequency = 967_680
+
+[trajectory_restart]
+enabled = false
+fractions = [0.10, 0.25, 0.50, 0.75]
+standard_probability = 0.25
+promotion_window = 100
+promotion_success_rate = 0.25
+reservoir_size = 32
