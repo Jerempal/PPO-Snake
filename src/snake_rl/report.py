@@ -116,7 +116,7 @@ def generate_reports(
         target = destination / "report.md"
         target.write_text("\n".join(lines), encoding="utf-8")
         (destination / "index.html").write_text(
-            '<!doctype html><meta charset="utf-8"><title>Snake training</title>'
+            '<!doctype html><meta charset="utf-8"><title>Entraînement Snake</title>'
             "<style>body{max-width:1200px;margin:24px auto;font:16px system-ui}"
             "img{width:100%;height:auto}</style>"
             f'<h1>{escape(run.name)}</h1><a href="report.md">Résumé</a>'
@@ -131,7 +131,7 @@ def generate_reports(
             for p in outputs
         )
         (output_dir / "index.html").write_text(
-            '<!doctype html><meta charset="utf-8"><title>Snake reports</title><ul>'
+            '<!doctype html><meta charset="utf-8"><title>Rapports Snake</title><ul>'
             + links
             + "</ul>",
             encoding="utf-8",

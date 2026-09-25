@@ -33,30 +33,32 @@ class TrajectoryStart:
     @classmethod
     def capture(cls, env: SnakeEnv) -> TrajectoryStart:
         if env._episode_over or env.food is None or env.steps_since_food != 0:
-            raise ValueError("Capture requires a live state immediately after an apple.")
+            raise ValueError("La capture exige un état actif juste après une pomme.")
         state = cls(tuple(env.snake), env.direction, env.food, env.config.width, env.config.height)
         state.validate(env)
         return state
 
     def validate(self, env: SnakeEnv) -> None:
         if (self.width, self.height) != (env.config.width, env.config.height):
-            raise ValueError("Trajectory start belongs to another map size.")
+            raise ValueError("La trajectoire appartient à une autre taille de carte.")
         if not 3 <= len(self.snake) < self.width * self.height:
-            raise ValueError("Invalid trajectory body length.")
+            raise ValueError("Longueur de corps invalide dans la trajectoire.")
         if len(set(self.snake)) != len(self.snake) or self.food in self.snake:
-            raise ValueError("Overlapping trajectory body or food.")
+            raise ValueError("Chevauchement du corps ou de la pomme dans la trajectoire.")
         if any(
             not (0 <= x < self.width and 0 <= y < self.height) for x, y in (*self.snake, self.food)
         ):
-            raise ValueError("Trajectory coordinates are outside the map.")
+            raise ValueError("Les coordonnées de la trajectoire sortent de la carte.")
         if any(
             abs(a[0] - b[0]) + abs(a[1] - b[1]) != 1
             for a, b in zip(self.snake, self.snake[1:], strict=False)
         ):
-            raise ValueError("Trajectory body must be contiguous.")
+            raise ValueError("Le corps de la trajectoire doit être contigu.")
         heading = tuple(a - b for a, b in zip(self.snake[0], self.snake[1], strict=True))
         if self.direction not in DIRECTIONS.values() or self.direction != heading:
-            raise ValueError("Trajectory direction disagrees with its head and neck.")
+            raise ValueError(
+                "La direction ne correspond pas à la tête et au cou de la trajectoire."
+            )
 
     def restart(self, env: SnakeEnv) -> tuple[Observation, dict[str, Any]]:
         """After a normal reset, replace geometry and reset episode-local counters.
@@ -83,7 +85,9 @@ class TrajectoryRestartWrapper(gym.Wrapper):
         self.settings = config
         self.snake_env: SnakeEnv = env.unwrapped
         if self.snake_env.start_states.enabled:
-            raise ValueError("Do not mix structured and trajectory starts in this experiment.")
+            raise ValueError(
+                "Ne mélangez pas les départs structurés et les reprises de trajectoires."
+            )
         self.lengths = config.lengths(self.snake_env.config.width * self.snake_env.config.height)
         self.banks: list[list[TrajectoryStart]] = [[] for _ in self.lengths]
         self.seen = [0] * len(self.lengths)
@@ -147,7 +151,7 @@ class TrajectoryRestartWrapper(gym.Wrapper):
 
     def set_trajectory_stage(self, stage: int) -> None:
         if not 0 <= stage <= len(self.lengths):
-            raise ValueError("Invalid trajectory stage.")
+            raise ValueError("Palier de trajectoire invalide.")
         self.stage = stage  # Applied only at the next reset.
 
     def trajectory_status(self) -> dict[str, Any]:

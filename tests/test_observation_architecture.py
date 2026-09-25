@@ -59,7 +59,7 @@ def test_recorded_architecture_drives_the_actual_network(normalization, tmp_path
     loaded = PPO.load(path, device="cpu")
     assert loaded.policy.features_extractor.grid_extractor.architecture == spec
     _check_resume_architecture(loaded, config)
-    with pytest.raises(ValueError, match="Resume architecture"):
+    with pytest.raises(ValueError, match="architecture chargée"):
         _check_resume_architecture(loaded, replace(config, architecture=replace(spec, pool_size=5)))
     np.testing.assert_array_equal(before, loaded.predict(obs, deterministic=True)[0])
 

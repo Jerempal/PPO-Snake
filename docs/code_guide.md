@@ -12,6 +12,7 @@
 | `baselines.py`, `expert.py` | Cycles hamiltoniens et planificateur BFS |
 | `benchmark.py` | PPO contre un solveur, depuis des départs standards |
 | `report.py`, `run_report.py` | Résumé et courbes d'entraînement |
+| `record_demo.py` | GIF PPO contre le cycle hamiltonien strict |
 
 ## Du jeu à une décision
 
@@ -54,7 +55,20 @@ uv run snake-benchmark --ppo-model runs/RUN_A/best_model/best_model.zip --episod
 Sans `--evaluate`, un rapport ne joue aucune nouvelle partie. Avec cette option,
 il évalue best/final à nouveau, sans cache. Pour le multi-map, employer
 `snake-evaluate --map-size N` pour chaque taille. Le benchmark ne joue qu'une
-taille par appel ; sans override, il utilise la taille par défaut du run.
+taille par appel ; sans paramètre de taille, il utilise la taille par défaut du run.
+
+Le tableau du README réutilise les évaluations PPO indépendantes et ajoute
+100 parties du cycle strict par taille, sur les mêmes graines (93000 à 93099).
+Pour reconstruire cette comparaison avec les rapports PPO locaux :
+
+```powershell
+uv run python scripts/build_portfolio.py --ppo-reports reports/multimap-heldout-93000
+```
+
+Les résultats agrégés et les parties du cycle sont conservés dans
+`results/hamiltonian_comparison.json`. Le GIF montre la première graine du test,
+avec le meilleur checkpoint de validation du modèle `multimap-trajectory-42`,
+sur 12×12. Il est accéléré (une image toutes les 10 actions).
 
 Les anciennes options `snake-report --curve`, `snake-train --report-curve` et
 `snake-benchmark --resume/--force-agent` ont été retirées. Les anciens résultats

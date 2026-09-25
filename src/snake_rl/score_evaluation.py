@@ -40,6 +40,7 @@ class ScoreEvalCallback(BaseCallback):
         self.best_mean_score = float("-inf")
         self.evaluations_without_improvement = 0
         self.history: list[dict[str, float | int]] = []
+        self._last_evaluation: tuple[int, int] | None = None
 
     def _on_training_start(self) -> None:
         """Protect the starting policy before applying any gradient update."""
@@ -51,13 +52,14 @@ class ScoreEvalCallback(BaseCallback):
         return self._evaluate_and_record(count_plateau=True)
 
     def _on_training_end(self) -> None:
-        """Evaluate the final policy when the cadence does not land on the last step."""
-        last_evaluated_step = int(self.history[-1]["timesteps"]) if self.history else -1
-        if last_evaluated_step != self.num_timesteps:
+        """Évalue aussi les poids mis à jour après la dernière collecte."""
+        state = (self.num_timesteps, getattr(self.model, "_n_updates", 0))
+        if self._last_evaluation != state:
             self._evaluate_and_record(count_plateau=False)
 
     def _evaluate_and_record(self, *, count_plateau: bool) -> bool:
         metrics = self._evaluate()
+        self._last_evaluation = (self.num_timesteps, getattr(self.model, "_n_updates", 0))
         selection_score = metrics[self.selection_metric]
         improved = selection_score > self.best_mean_score + self.min_score_improvement
         if improved:

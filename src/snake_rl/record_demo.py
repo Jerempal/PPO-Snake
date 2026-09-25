@@ -1,4 +1,4 @@
-"""Record a compact PPO-versus-Hamiltonian gameplay GIF."""
+"""Enregistre un GIF comparant PPO au cycle hamiltonien strict."""
 
 from __future__ import annotations
 
@@ -7,16 +7,17 @@ from pathlib import Path
 
 import numpy as np
 
-from snake_rl.baselines import HamiltonianPolicy
-from snake_rl.config import load_config
+from snake_rl.baselines import HamiltonianCyclePolicy
+from snake_rl.config import load_config, load_resolved_config
 from snake_rl.env import SnakeEnv
+from snake_rl.evaluate import _find_run_config
 from snake_rl.evaluation_protocol import FIXED_HORIZON, prepare_evaluation
 
 
 def record_demo(
     *,
     model_path: Path,
-    config_path: Path,
+    config_path: Path | None,
     output: Path,
     seed: int,
     steps: int,
@@ -33,8 +34,16 @@ def record_demo(
     if steps < 1 or frame_interval < 1:
         raise ValueError("steps et frame_interval doivent être positifs.")
 
+    config_path = config_path or _find_run_config(model_path)
+    if config_path is None:
+        raise ValueError("Configuration du modèle introuvable ; indiquez --config.")
+    config = (
+        load_resolved_config(config_path)
+        if config_path.suffix == ".json"
+        else load_config(config_path)
+    )
     config, _ = prepare_evaluation(
-        load_config(config_path),
+        config,
         protocol=FIXED_HORIZON,
         horizon=10_000,
     )
@@ -43,7 +52,7 @@ def record_demo(
     cycle_env = SnakeEnv(config.environment, config.rewards, render_mode="rgb_array")
     neural_observation, neural_info = neural_env.reset(seed=seed)
     _, cycle_info = cycle_env.reset(seed=seed)
-    hamiltonian = HamiltonianPolicy()
+    hamiltonian = HamiltonianCyclePolicy()
     neural_finished = cycle_finished = False
     frames = []
 
@@ -53,10 +62,10 @@ def record_demo(
         image = Image.fromarray(frame).resize((320, 320), Image.Resampling.NEAREST)
         canvas = Image.new("RGB", (320, 354), (20, 24, 33))
         canvas.paste(image, (0, 34))
-        suffix = " - termine" if finished else ""
+        suffix = " - victoire" if info.get("won") else " - termine" if finished else ""
         ImageDraw.Draw(canvas).text(
             (8, 10),
-            f"{label} - score {info['score']}{suffix}",
+            f"{label} | pommes {info['score']} | pas {info['steps']}{suffix}",
             fill=(235, 238, 245),
         )
         return canvas
@@ -76,7 +85,7 @@ def record_demo(
                 cycle_finished = terminated or truncated
             if step % frame_interval == 0 or (neural_finished and cycle_finished):
                 left = panel(neural_env, "PPO", neural_info, neural_finished)
-                right = panel(cycle_env, "Hamiltonien", cycle_info, cycle_finished)
+                right = panel(cycle_env, "Cycle strict", cycle_info, cycle_finished)
                 combined = Image.new("RGB", (644, 354), (10, 12, 18))
                 combined.paste(left, (0, 0))
                 combined.paste(right, (324, 0))
@@ -101,7 +110,7 @@ def record_demo(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", type=Path, required=True)
-    parser.add_argument("--config", type=Path, default=Path("configs/ppo.toml"))
+    parser.add_argument("--config", type=Path, help="Par défaut : configuration du modèle.")
     parser.add_argument("--output", type=Path, default=Path("assets/gameplay.gif"))
     parser.add_argument("--seed", type=int, default=60_000)
     parser.add_argument("--steps", type=int, default=2_000)

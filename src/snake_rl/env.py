@@ -1,4 +1,4 @@
-"""Gymnasium-compatible Snake environment."""
+"""Environnement Snake compatible avec Gymnasium."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ Observation = dict[str, np.ndarray]
 class SnakeEnv(gym.Env[Observation, int]):
     """Environnement Snake déterministe, sans affichage par défaut.
 
-    Each observation combines seven spatial planes with 33 control/state values.
+    Chaque observation combine sept plans spatiaux et 33 valeurs de contrôle et d'état.
     La grille et le vecteur sont toujours orientés dans le repère du serpent.
     """
 
@@ -77,7 +77,7 @@ class SnakeEnv(gym.Env[Observation, int]):
     ) -> None:
         super().__init__()
         if render_mode not in {None, *self.metadata["render_modes"]}:
-            raise ValueError(f"Unsupported render mode: {render_mode}")
+            raise ValueError(f"Mode de rendu non pris en charge : {render_mode}")
 
         self.config = env_config or EnvConfig()
         self.rewards = reward_config or RewardConfig()
@@ -535,7 +535,9 @@ class SnakeEnv(gym.Env[Observation, int]):
             try:
                 import pygame
             except ImportError as exc:
-                raise ImportError("Human rendering requires: pip install 'snake-rl[play]'") from exc
+                raise ImportError(
+                    "Le rendu humain nécessite : pip install 'snake-rl[play]'"
+                ) from exc
             self._pygame = pygame
             pygame.init()
             self._window = pygame.display.set_mode((frame.shape[1], frame.shape[0]))

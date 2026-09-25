@@ -1,4 +1,4 @@
-"""Play Snake manually or watch a trained reinforcement-learning agent."""
+"""Jouez au clavier ou observez un agent entraîné."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def play(config: ExperimentConfig, model_path: Path | None, seed: int) -> None:
             from stable_baselines3 import PPO
         except ImportError as exc:
             raise ImportError(
-                "Model playback requires: pip install 'snake-rl[train,play]'"
+                "La lecture du modèle nécessite : pip install 'snake-rl[train,play]'"
             ) from exc
         model = PPO.load(model_path)
 
@@ -48,16 +48,14 @@ def play(config: ExperimentConfig, model_path: Path | None, seed: int) -> None:
                     running = False
                 elif event.type == pygame.KEYDOWN and event.key in key_actions:
                     desired_direction = DIRECTIONS[key_actions[event.key]]
-                    action = int(env.direction, desired_direction)
 
             if not running:
                 break
             if model is not None:
                 predicted, _ = model.predict(observation, deterministic=True)
                 action = int(predicted)
-            # else:
-            #     action = int(_relative_action(
-            #         env.direction, desired_direction))
+            else:
+                action = int(_relative_action(env.direction, desired_direction))
 
             observation, _, terminated, truncated, info = env.step(action)
             if terminated or truncated:
@@ -73,7 +71,7 @@ def play(config: ExperimentConfig, model_path: Path | None, seed: int) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=Path("configs/ppo.toml"))
-    parser.add_argument("--model", type=Path, help="Optional trained neural model.")
+    parser.add_argument("--model", type=Path, help="Modèle neuronal entraîné (facultatif).")
     parser.add_argument("--seed", type=int, default=42)
     add_map_arguments(parser)
     return parser

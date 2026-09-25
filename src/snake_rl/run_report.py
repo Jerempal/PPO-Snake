@@ -200,7 +200,9 @@ def render_run_report(run_dirs: list[Path]) -> str:
         summaries.append(
             {
                 "name": run_dir.name,
-                "status": metadata.get("status", "unknown"),
+                "status": {"complete": "terminé", "running": "en cours", "failed": "échoué"}.get(
+                    metadata.get("status"), "inconnu"
+                ),
                 "best": float(best.get("selection_score", float("nan"))),
                 "best_step": int(best.get("timesteps", 0)),
                 "final": float(final.get("selection_score", float("nan"))),

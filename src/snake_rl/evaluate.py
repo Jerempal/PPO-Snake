@@ -227,7 +227,7 @@ def main() -> None:
         print("Configuration du run introuvable ; utilisation de configs/ppo.toml.")
     elif config_path.suffix == ".json":
         config = load_resolved_config(config_path)
-        print(f"Using model run config: {config_path}")
+        print(f"Configuration du modèle : {config_path}")
     else:
         config = load_config(config_path)
     resolved_config = apply_map_arguments(config, args)

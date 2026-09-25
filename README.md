@@ -8,16 +8,24 @@ Le PPO reçoit une grille égocentrique encodée par un CNN et 33 caractéristiq
 vectorielles. Un curriculum optionnel reprend ses propres trajectoires à des
 longueurs croissantes. Un même modèle peut jouer sur plusieurs tailles de carte.
 
+![Partie 12×12 : PPO et cycle hamiltonien strict](assets/gameplay.gif)
+
+Partie accélérée : PPO avec curriculum (graine d'entraînement 42, `best_model`)
+et cycle strict, sur la première graine du test (93000). Cet exemple illustre
+les déplacements ; les taux de victoire ci-dessous portent sur toutes les parties.
+
 ## Résultats
 
-Sur les tailles apprises, moyennes de trois seeds d'entraînement et 100 parties
-de test par seed et par taille, depuis un serpent de longueur 3 :
+Sur les tailles apprises, depuis un serpent de longueur 3 : PPO est évalué sur
+trois graines d'entraînement et 100 parties par modèle et par taille. Le cycle
+hamiltonien strict est évalué sur les mêmes 100 graines de jeu, une seule fois
+par taille puisqu'il est déterministe et ne nécessite aucun entraînement.
 
-| Carte | PPO direct : pommes / victoires | PPO curriculum : pommes / victoires |
-| --- | ---: | ---: |
-| 8×8 | 57,18 / 82,3 % | 57,76 / 90,0 % |
-| 10×10 | 83,77 / 59,0 % | 85,39 / 76,0 % |
-| 12×12 | 101,69 / 30,3 % | 110,91 / 55,0 % |
+| Carte | PPO direct : pommes / victoires | PPO curriculum : pommes / victoires | Cycle strict : pommes / victoires |
+| --- | ---: | ---: | ---: |
+| 8×8 | 57,18 / 82,3 % | 57,76 / 90,0 % | 61 / 100 % |
+| 10×10 | 83,77 / 59,0 % | 85,39 / 76,0 % | 97 / 100 % |
+| 12×12 | 101,69 / 30,3 % | 110,91 / 55,0 % | 141 / 100 % |
 
 Chaque entraînement consomme 9,03 millions de transitions, réparties également
 entre les trois tailles. Les meilleurs checkpoints sont sélectionnés en validation,
@@ -28,9 +36,12 @@ garantit pas la généralisation : seulement 1 à 5,3 % de victoires sur 9×9 et
 11×11. Ces tests changent aussi la parité et le padding ; ils ne permettent pas
 d'isoler une seule cause. [Chiffres par seed](results/multimap_summary.json).
 
-Le solveur hamiltonien strict fournit une référence sans apprentissage. Il exige
-une carte compatible avec un cycle et un départ ordonné sur ce cycle ; l'horizon
-peut limiter sa réussite. Le tableau ci-dessus compare les deux PPO, pas le solveur.
+Le cycle strict termine les 300 parties testées : le PPO ne le dépasse donc pas
+en fiabilité. Le solveur exige une carte compatible et un départ ordonné sur le
+cycle ; un horizon trop court peut empêcher sa victoire sur des cartes plus grandes.
+Tous les agents disposent ici de 10 000 actions, sans arrêt pour boucle.
+Les mêmes graines de jeu ne garantissent pas les mêmes positions de pommes après
+divergence des corps. [Résultats de la comparaison](results/hamiltonian_comparison.json).
 
 ## Utilisation
 
@@ -53,10 +64,12 @@ Les courbes et le résumé sont générés automatiquement après l'entraînemen
 ```powershell
 uv run snake-report runs/ppo8
 uv run snake-evaluate runs/ppo8/best_model/best_model.zip --episodes 100 --seed 93000 --output reports/ppo8-test.json
+uv run snake-record-demo --model runs/ppo8/best_model/best_model.zip --seed 93000 --steps 10000 --frame-interval 10 --output assets/gameplay.gif
 ```
 
 Les checkpoints ne sont pas fournis dans le dépôt. `configs/smoke.toml` permet un
 test court ; la configuration 8×8 prévoit 7,5 millions de transitions.
+La commande GIF retrouve automatiquement la configuration enregistrée avec le modèle.
 
 [Guide du code](docs/code_guide.md) · [Multi-cartes](docs/multimap.md) ·
 [Curriculum](docs/trajectory_restart.md)

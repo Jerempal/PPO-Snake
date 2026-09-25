@@ -1,4 +1,4 @@
-"""Train PPO and save its configuration, checkpoints and metrics."""
+"""Entraîne PPO et sauvegarde sa configuration, ses checkpoints et ses métriques."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ def _check_resume_architecture(model: Any, config: ExperimentConfig) -> None:
         or model.policy.net_arch != expected_mlp
     ):
         raise ValueError(
-            "Resume architecture differs from the requested configuration. "
+            "L'architecture chargée diffère de la configuration demandée. "
             "Utilisez la même architecture ou une initialisation explicite de la politique."
         )
 
@@ -113,11 +113,13 @@ def train(
     if resume_from is not None:
         resume_from = resume_from.resolve()
         if not resume_from.is_file():
-            raise FileNotFoundError(f"Parent model not found: {resume_from}")
+            raise FileNotFoundError(f"Modèle parent introuvable : {resume_from}")
     if initialize_policy_from is not None:
         initialize_policy_from = initialize_policy_from.resolve()
         if not initialize_policy_from.is_file():
-            raise FileNotFoundError(f"Policy initializer model not found: {initialize_policy_from}")
+            raise FileNotFoundError(
+                f"Modèle d'initialisation introuvable : {initialize_policy_from}"
+            )
     try:
         import torch
         from stable_baselines3 import PPO
@@ -133,9 +135,9 @@ def train(
         raise ImportError("L'entraînement nécessite : pip install 'snake-rl[train]'") from exc
 
     print(
-        "PyTorch device check: "
-        f"requested={config.training.device}, "
-        f"cuda_available={torch.cuda.is_available()}, "
+        "Périphérique PyTorch : "
+        f"demandé={config.training.device}, "
+        f"cuda_disponible={torch.cuda.is_available()}, "
         f"torch_cuda={torch.version.cuda}, "
         f"gpu={torch.cuda.get_device_name(0) if torch.cuda.is_available() else None}"
     )
@@ -164,8 +166,8 @@ def train(
             }
             if resume_from is not None or initialize_policy_from is not None:
                 warnings.warn(
-                    "Trajectory restart banks and promotions start fresh in this new run; "
-                    "they are not restored from policy checkpoints.",
+                    "Les réservoirs et paliers de trajectoires repartent de zéro dans ce run ; "
+                    "ils ne sont pas restaurés depuis les checkpoints.",
                     RuntimeWarning,
                     stacklevel=2,
                 )
@@ -301,9 +303,10 @@ def train(
                     )
                 except RuntimeError as exc:
                     raise ValueError(
-                        "Policy initializer is incompatible with the target architecture. "
-                        "Observation dimensions may differ only when every learned tensor "
-                        "shape remains identical."
+                        "Le modèle d'initialisation est incompatible avec l'architecture cible. "
+                        "Les dimensions des observations peuvent différer uniquement "
+                        "si chaque tenseur appris "
+                        "conserve la même forme."
                     ) from exc
                 model.save(run_dir / "initialized_model")
         else:
@@ -352,7 +355,7 @@ def train(
             if not active_error:
                 raise
             warnings.warn(
-                f"Could not finalize the failed run manifest: {exc}",
+                f"Impossible de finaliser les métadonnées du run échoué : {exc}",
                 RuntimeWarning,
                 stacklevel=2,
             )
@@ -360,7 +363,7 @@ def train(
             if not active_error:
                 raise close_errors[0]
             warnings.warn(
-                f"Could not close an environment after failure: {close_errors[0]}",
+                f"Impossible de fermer un environnement après un échec : {close_errors[0]}",
                 RuntimeWarning,
                 stacklevel=2,
             )
@@ -368,7 +371,7 @@ def train(
     outcome = (
         "Initialisation de la politique terminée" if initialize_only else "Entraînement terminé"
     )
-    print(f"{outcome}. Artifacts: {run_dir}")
+    print(f"{outcome}. Fichiers : {run_dir}")
     if not initialize_only:
         from snake_rl.report import generate_reports
 
@@ -442,9 +445,9 @@ def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
     if args.resume_from is not None and args.initialize_policy_from is not None:
-        parser.error("--resume-from and --initialize-policy-from are mutually exclusive.")
+        parser.error("--resume-from et --initialize-policy-from sont exclusifs.")
     if args.initialize_only and args.initialize_policy_from is None:
-        parser.error("--initialize-only requires --initialize-policy-from.")
+        parser.error("--initialize-only nécessite --initialize-policy-from.")
     config = apply_map_arguments(load_config(args.config), args)
     if args.timesteps is not None:
         if args.timesteps < 1:

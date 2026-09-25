@@ -154,3 +154,22 @@ def test_vector_evaluation_uses_equal_worker_quotas(tmp_path) -> None:
     callback._on_training_start()
 
     assert callback.history[0]["mean_score"] == 5
+
+
+def test_final_evaluation_detects_updates_without_new_transitions(tmp_path, monkeypatch):
+    callback = ScoreEvalCallback(FakeVecEnv(), 1, 2, tmp_path / "best_model", True, 2, 0.0, 10_000)
+    callback.model = FakeModel()
+    callback.model._n_updates = 0
+    callback.num_timesteps = 128
+    callback.n_calls = 1
+    callback._on_step()
+    assert callback.best_mean_score == 4
+
+    # SB3 optimise après la collecte, sans incrémenter num_timesteps.
+    callback.model._n_updates = 1
+    monkeypatch.setattr(callback, "_evaluate", lambda: {"mean_score": 9.0})
+    callback._on_training_end()
+    callback._on_training_end()
+    assert [row["timesteps"] for row in callback.history] == [128, 128]
+    assert callback.best_mean_score == 9
+    assert len(callback.model.saved) == 2

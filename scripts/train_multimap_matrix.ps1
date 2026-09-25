@@ -9,7 +9,7 @@ try {
     foreach ($seed in $Seeds) {
         foreach ($arm in @("direct", "trajectory")) {
             if (Test-Path -LiteralPath "runs/multimap-$arm-$seed") {
-                throw "Run already exists: multimap-$arm-$seed"
+                throw "Le run existe déjà : multimap-$arm-$seed"
             }
         }
     }
@@ -21,7 +21,7 @@ try {
             Write-Host ("python " + ($arguments -join " "))
             if ($Execute) {
                 & $python @arguments
-                if ($LASTEXITCODE -ne 0) { throw "Failed: multimap-$arm-$seed" }
+                if ($LASTEXITCODE -ne 0) { throw "Échec : multimap-$arm-$seed" }
             }
         }
     }

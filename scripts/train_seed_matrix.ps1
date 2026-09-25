@@ -19,14 +19,14 @@ try {
     foreach ($seed in $Seeds) {
         $runName = "$Prefix-seed$seed"
         if (Test-Path -LiteralPath (Join-Path "runs" $runName)) {
-            throw "Run already exists: $runName"
+            throw "Le run existe déjà : $runName"
         }
         $arguments = @("run", "snake-train", "--config", $Config,
             "--device", $Device, "--seed", "$seed", "--run-name", $runName)
         Write-Host ("uv " + (($arguments | ForEach-Object { "'" + $_.Replace("'", "''") + "'" }) -join " "))
         if ($Execute) {
             & uv @arguments
-            if ($LASTEXITCODE -ne 0) { throw "Training failed for $runName." }
+            if ($LASTEXITCODE -ne 0) { throw "Échec de l'entraînement pour $runName." }
         }
     }
 } finally {

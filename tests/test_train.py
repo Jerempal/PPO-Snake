@@ -141,7 +141,7 @@ def test_training_setup_failure_finalizes_manifest(monkeypatch, tmp_path: Path) 
 
 
 def test_training_rejects_missing_parent_before_creating_run(tmp_path: Path) -> None:
-    with pytest.raises(FileNotFoundError, match="Parent model"):
+    with pytest.raises(FileNotFoundError, match="Modèle parent"):
         train(
             load_config("configs/smoke.toml"),
             tmp_path,

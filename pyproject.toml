@@ -26,8 +26,8 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Jerempal/snake-rl-benchmark"
-Issues = "https://github.com/Jerempal/snake-rl-benchmark/issues"
+Repository = "https://github.com/Jerempal/PPO-Snake"
+Issues = "https://github.com/Jerempal/PPO-Snake/issues"
 
 [project.optional-dependencies]
 train = [

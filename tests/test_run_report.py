@@ -52,8 +52,8 @@ def test_run_report_renders_multiple_sparse_runs_deterministically(tmp_path: Pat
 
     assert rendered == render_run_report([first, second])
     assert "Diagnostics de l entrainement Snake" in rendered
-    assert "first : complete" in rendered
-    assert "second : complete" in rendered
+    assert "first : terminé" in rendered
+    assert "second : terminé" in rendered
     assert "Score de sélection en validation" in rendered
     assert "Divergence KL approximative de PPO" in rendered
     assert "Perte de valeur (moyenne du mini-lot)" in rendered

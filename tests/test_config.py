@@ -71,7 +71,7 @@ def test_normalized_distance():
 
 def test_structured_starts_are_evaluation_only():
     config = load_config(ROOT / "configs/ppo.toml")
-    with pytest.raises(ValueError, match="evaluation-only"):
+    with pytest.raises(ValueError, match="réservés à l'évaluation"):
         replace(config, start_states=replace(config.start_states, enabled=True))
     assert not evaluation_start_states(config.start_states, "standard").enabled
     assert evaluation_start_states(config.start_states, "configured").enabled
@@ -103,9 +103,9 @@ def test_loader_rejects_obsolete_keys_and_missing_sections(tmp_path):
         ("rewards", "safety", 0),
     ]:
         changed = {**raw, section: {**raw[section], key: value}}
-        with pytest.raises(ValueError, match="Unknown keys"):
+        with pytest.raises(ValueError, match="Clés inconnues"):
             experiment_config_from_dict(changed)
-    with pytest.raises(ValueError, match="Unknown configuration sections"):
+    with pytest.raises(ValueError, match="Sections de configuration inconnues"):
         experiment_config_from_dict({**raw, "restart_curriculum": {}})
     del raw["training"]
     with pytest.raises(ValueError, match="Sections de configuration manquantes"):

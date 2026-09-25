@@ -265,8 +265,8 @@ class ExperimentConfig:
                     self.trajectory_restart.lengths(size * size)
         if self.start_states.enabled:
             raise ValueError(
-                "Structured starts are evaluation-only; use trajectory_restart "
-                "for captured training starts."
+                "Les départs structurés sont réservés à l'évaluation ; utilisez trajectory_restart "
+                "pour reprendre des états atteints pendant l'entraînement."
             )
         if self.trajectory_restart.enabled:
             self.trajectory_restart.lengths(self.environment.width * self.environment.height)
@@ -286,7 +286,7 @@ ConfigType = TypeVar("ConfigType")
 def _build_section(cls: type[ConfigType], values: dict[str, Any], section: str) -> ConfigType:
     unknown = sorted(set(values) - {field.name for field in fields(cls)})
     if unknown:
-        raise ValueError(f"Unknown keys in [{section}]: {', '.join(unknown)}")
+        raise ValueError(f"Clés inconnues dans [{section}]: {', '.join(unknown)}")
     return cls(**values)
 
 
@@ -320,7 +320,7 @@ def experiment_config_from_dict(raw: dict[str, Any]) -> ExperimentConfig:
     required = set(sections) - {"start_states", "trajectory_restart", "architecture"}
     if set(raw) - set(sections):
         raise ValueError(
-            f"Unknown configuration sections: {', '.join(sorted(set(raw) - set(sections)))}"
+            f"Sections de configuration inconnues : {', '.join(sorted(set(raw) - set(sections)))}"
         )
     if required - set(raw):
         raise ValueError(
